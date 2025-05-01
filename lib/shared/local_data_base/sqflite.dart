@@ -1,82 +1,55 @@
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class Sqflite {
-  static Future<void> createDatabase() async {
-    await openDatabase(
-      'todo.db',
+  static Database? _database;
+  Future<Database?> get database async {
+    if (_database == null) {
+      _database = await initialDP();
+    }
+    return _database!;
+  }
+
+  initialDP() async {
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'demo.db');
+    Database database = await openDatabase(
+      path,
       version: 1,
-      onCreate: (database, version) {
-        database
-            .execute(
-              'CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, date TEXT, time TEXT, status TEXT)',
-            )
-            .then((value) {})
-            .catchError((error) {
-              throw ('error when creating table ${error.toString()}');
-            });
-      },
-      onOpen: (database) {
-        print('database opened');
-      },
+      onCreate: oncreate,
     );
+    print('database created=======================================');
+    return database;
   }
 
-  static Future<void> insertToDatabase({
-    required String title,
-    required String date,
-    required String time,
-  }) async {
-    var database = await openDatabase('todo.db');
-    database.transaction((txn) async {
-      txn
-          .rawInsert(
-            'INSERT INTO tasks(title, date, time, status) VALUES("$title", "$date", "$time", "new")',
-          )
-          .then((value) {
-            print('inserted successfully');
-          })
-          .catchError((error) {
-            print('error when inserting ${error.toString()}');
-          });
-    });
+  oncreate(Database db, int version) async {
+    // When creating the db, create the table
+    await db.execute('''CREATE TABLE notes (
+      id INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT PRIMARY KRY,
+      TITLE TEXT NOT NULL,
+      )''');
+
+    print('table created=======================================');
   }
 
-  static Future<void> getDataFromDatabase() async {
-    var database = await openDatabase('todo.db');
-    database
-        .rawQuery('SELECT * FROM tasks')
-        .then((value) {
-          print(value.toString());
-        })
-        .catchError((error) {
-          print('error when getting data ${error.toString()}');
-        });
+  Future<List<Map>> readData() async {
+    Database? db = await database;
+    List<Map> response = await db!.rawQuery('SELECT * FROM notes');
+    return response;
   }
 
-  static Future<void> updateDatabase({
-    required String status,
-    required int id,
-  }) async {
-    var database = await openDatabase('todo.db');
-    database
-        .rawUpdate('UPDATE tasks SET status = ? WHERE id = ?', [status, id])
-        .then((value) {
-          print('updated successfully');
-        })
-        .catchError((error) {
-          print('error when updating ${error.toString()}');
-        });
+  Future<void> insertData(String sql) async {
+    Database? db = await database;
+    int response = await db!.rawInsert(sql);
   }
 
-  static Future<void> deleteFromDatabase({required int id}) async {
-    var database = await openDatabase('todo.db');
-    database
-        .rawDelete('DELETE FROM tasks WHERE id = ?', [id])
-        .then((value) {
-          print('deleted successfully');
-        })
-        .catchError((error) {
-          print('error when deleting ${error.toString()}');
-        });
+  Future<void> deletData(String sql) async {
+    Database? db = await database;
+    int response = await db!.rawDelete(sql);
+  }
+
+  Future<void> updateData(String sql) async {
+    Database? db = await database;
+    int response = await db!.rawUpdate(sql);
   }
 }

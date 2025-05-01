@@ -3,6 +3,7 @@ import 'package:todoapp2/moduls/archevied_screen.dart';
 import 'package:todoapp2/moduls/done_screen.dart';
 import 'package:todoapp2/moduls/screen_widgets/show_bottom_sheet.dart';
 import 'package:todoapp2/moduls/tasks_screen.dart';
+import 'package:todoapp2/shared/local_data_base/sqflite.dart';
 
 class HomeLayout extends StatefulWidget {
   const HomeLayout({super.key});
@@ -29,7 +30,14 @@ class _HomeLayoutState extends State<HomeLayout> {
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // if(){}
+          // Sqflite.createDatabase();
+          // Sqflite.getDataFromDatabase()
+          //     .then((value) {
+          //       print(value.toString());
+          //     })
+          //     .catchError((error) {
+          //       print('error when getting data ${error.toString()}');
+          //     });
           if (isBottomSheetShown == false) {
             scaffoldKey.currentState!
                 .showBottomSheet((context) {
