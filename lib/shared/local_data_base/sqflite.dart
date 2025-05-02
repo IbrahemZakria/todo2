@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:todoapp2/constant.dart';
 
 class Sqflite {
   static Database? _database;
@@ -15,41 +16,73 @@ class Sqflite {
     String path = join(databasesPath, 'demo.db');
     Database database = await openDatabase(
       path,
-      version: 1,
-      onCreate: oncreate,
+      version: 3,
+      onCreate: onCreate,
+      onUpgrade: onUpgrade,
     );
     print('database created=======================================');
     return database;
   }
 
-  oncreate(Database db, int version) async {
-    // When creating the db, create the table
-    await db.execute('''CREATE TABLE notes (
-      id INTEGER PRIMARY KEY NOT NULL AUTOINCREMENT PRIMARY KRY,
-      TITLE TEXT NOT NULL,
-      )''');
+  Future<void> onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE $tableName (
+       $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
+        $columnTitle TEXT NOT NULL
+        $columnDate TEXT NOT NULL,
+        $columnTime TEXT NOT NULL
 
-    print('table created=======================================');
+      )
+    ''');
+    print('Table $tableName created');
+  }
+
+  Future<void> onUpgrade(Database db, int oldVersion, int newVersion) async {
+    print('upgrade database');
+    await db.execute(
+      'ALTER TABLE notes ADD COLUMN $columnTime TEXT NOT NULL DEFAULT ""',
+    );
+    // إضافة عمود time إذا لم يكن موجودًا
+    await db.execute(
+      'ALTER TABLE notes ADD COLUMN $columnDate TEXT NOT NULL DEFAULT ""',
+    );
+    print('Table $tableName upgraded');
   }
 
   Future<List<Map>> readData() async {
     Database? db = await database;
-    List<Map> response = await db!.rawQuery('SELECT * FROM notes');
+    List<Map> response = await db!.rawQuery('SELECT * FROM $tableName');
     return response;
   }
 
-  Future<void> insertData(String sql) async {
+  Future<int> insertData({
+    required String title,
+    required String date,
+    required String time,
+  }) async {
     Database? db = await database;
-    int response = await db!.rawInsert(sql);
+    int response = await db!.rawInsert(
+      "insert into $tableName ($columnTitle,$columnDate,$columnTime) values ('$title','$date','$time')",
+    );
+    return response;
   }
 
-  Future<void> deletData(String sql) async {
+  Future<int> deletData(String columnid) async {
     Database? db = await database;
-    int response = await db!.rawDelete(sql);
+    int response = await db!.rawDelete(
+      "DELETE FROM $tableName WHERE $columnId = '$columnid'",
+    );
+    return response;
   }
 
-  Future<void> updateData(String sql) async {
+  Future<int> updateData({
+    required String columnid,
+    required updatedTitle,
+  }) async {
     Database? db = await database;
-    int response = await db!.rawUpdate(sql);
+    int response = await db!.rawUpdate(
+      'UPDATE $tableName SET $columnTitle = "$updatedTitle" WHERE$columnId = "$columnid"',
+    );
+    return response;
   }
 }

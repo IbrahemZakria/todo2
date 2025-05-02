@@ -13,7 +13,11 @@ class DoneScreen extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             sqflite
-                .insertData("insert into notes (title) values ('Task 1')")
+                .insertData(
+                  title: 'Task 22',
+                  date: '2023-10-01',
+                  time: '10:00 AM',
+                )
                 .then((value) {
                   print('Data inserted successfully');
                 })
@@ -35,6 +39,32 @@ class DoneScreen extends StatelessWidget {
                 });
           },
           child: Text('read Task'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            sqflite
+                .deletData("DELETE FROM notes WHERE title = 'Task 22'")
+                .then((value) {
+                  print(value.toString());
+                })
+                .catchError((error) {
+                  print('Error reading data: $error');
+                });
+          },
+          child: Text('delete Task'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            sqflite
+                .updateData(columnid: '5', updatedTitle: "ewc")
+                .then((value) {
+                  print(value.toString());
+                })
+                .catchError((error) {
+                  print('Error reading data: $error');
+                });
+          },
+          child: Text('update Task'),
         ),
         // يمكنك إضافة المزيد من العناصر هنا
       ],
