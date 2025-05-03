@@ -43,7 +43,7 @@ class DoneScreen extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             sqflite
-                .deletData("DELETE FROM notes WHERE title = 'Task 22'")
+                .deletData('1')
                 .then((value) {
                   print(value.toString());
                 })
@@ -55,8 +55,14 @@ class DoneScreen extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: () {
+            sqflite.deletedataase();
+          },
+          child: Text('delet database'),
+        ),
+        ElevatedButton(
+          onPressed: () {
             sqflite
-                .updateData(columnid: '5', updatedTitle: "ewc")
+                .updateData(columnid: '2', updatedTitle: "ewc")
                 .then((value) {
                   print(value.toString());
                 })

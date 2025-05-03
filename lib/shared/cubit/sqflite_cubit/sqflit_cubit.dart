@@ -1,12 +1,24 @@
+import 'dart:math';
+
+import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
+
 import 'package:path/path.dart';
 import 'package:todoapp2/constant.dart';
+part 'sqflit_state.dart';
 
-class Sqflite {
+class SqflitCubit extends Cubit<SqflitState> {
+  SqflitCubit() : super(SqflitInitial());
+  static SqflitCubit get(context) => BlocProvider.of(context);
+  Database? database;
+  List<Map> newTasks = [];
   static Database? _database;
-  Future<Database?> get database async {
+  Future<Database> get databased async {
     if (_database == null) {
       _database = await initialDP();
+      emit(SqflitCreateDatabaseState());
     }
     return _database!;
   }
@@ -31,6 +43,7 @@ class Sqflite {
         $columnDate TEXT NOT NULL,
         $columnTime TEXT NOT NULL)''',
     );
+    emit(SqflitCreateDatabaseState());
     print('Table $tableName created');
   }
 
@@ -43,13 +56,15 @@ class Sqflite {
     await db.execute(
       'ALTER TABLE notes ADD COLUMN $columnDate TEXT NOT NULL DEFAULT ""',
     );
+
     print('Table $tableName upgraded');
   }
 
   Future<List<Map>> readData() async {
-    Database? db = await database;
-    List<Map> response = await db!.rawQuery('SELECT * FROM $tableName');
-    return response;
+    Database? db = await databased;
+    newTasks = await db.rawQuery('SELECT * FROM $tableName');
+    emit(SqflitGetDatabaseState());
+    return newTasks;
   }
 
   Future<int> insertData({
@@ -57,18 +72,20 @@ class Sqflite {
     required String date,
     required String time,
   }) async {
-    Database? db = await database;
-    int response = await db!.rawInsert(
+    Database? db = await databased;
+    int response = await db.rawInsert(
       "insert into $tableName ($columnTitle,$columnDate,$columnTime) values ('$title','$date','$time')",
     );
+    emit(SqflitInsertDatabaseState());
     return response;
   }
 
   Future<int> deletData(String columnid) async {
-    Database? db = await database;
-    int response = await db!.rawDelete(
+    Database? db = await databased;
+    int response = await db.rawDelete(
       "DELETE FROM $tableName WHERE $columnId = '$columnid'",
     );
+    emit(SqflitDeleteDatabaseState());
     return response;
   }
 
@@ -76,10 +93,11 @@ class Sqflite {
     required String columnid,
     required updatedTitle,
   }) async {
-    Database? db = await database;
-    int response = await db!.rawUpdate(
+    Database? db = await databased;
+    int response = await db.rawUpdate(
       'UPDATE $tableName SET $columnTitle = "$updatedTitle" WHERE $columnId = "$columnid"',
     );
+    emit(SqflitUpdateDatabaseState());
     return response;
   }
 

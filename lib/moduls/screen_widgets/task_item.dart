@@ -6,15 +6,20 @@ class TaskItem extends StatelessWidget {
     required this.taskTime,
     required this.taskDate,
     required this.taskTitle,
+    required this.onDelete,
   });
   String taskTime;
   String taskDate;
   String taskTitle;
+  Function onDelete;
+  Function? onUpdate;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      color: const Color.fromARGB(255, 227, 227, 227),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
           CircleAvatar(
@@ -34,6 +39,12 @@ class TaskItem extends StatelessWidget {
                 Text(taskDate, style: TextStyle(color: Colors.grey)),
               ],
             ),
+          ),
+          IconButton(
+            onPressed: () {
+              onDelete();
+            },
+            icon: Icon(Icons.delete, color: Colors.red, size: 60),
           ),
         ],
       ),
